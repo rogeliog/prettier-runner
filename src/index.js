@@ -2,7 +2,7 @@ const path = require('path');
 const throat = require("throat");
 const execa = require("execa");
 
-const eslintBin = path.resolve("node_modules", ".bin", "eslint");
+const prettierBin = path.resolve("node_modules", ".bin", "prettier");
 
 const toTestResult = ({testPath, status, start, end, failureMessage}) => {
   return {
@@ -41,7 +41,7 @@ const toTestResult = ({testPath, status, start, end, failureMessage}) => {
   };
 }
 
-class ESLintRunner {
+class PrettierRunner {
   constructor(globalConfig) {
     this._globalConfig = globalConfig;
   }
@@ -66,7 +66,7 @@ class ESLintRunner {
 
   async _runTest(testPath) {
     const start = +new Date();
-    return execa(eslintBin, ["--color", testPath])
+    return execa(prettierBin, ["--write", testPath])
       .then(({ stdout }) => {
         return toTestResult({
           testPath,
@@ -75,13 +75,13 @@ class ESLintRunner {
           end: +new Date(),
         });
       })
-      .catch(({ stdout }) => {
+      .catch(({ stdout, stderr }) => {
         return toTestResult({
           testPath,
           status: 'failed',
           start,
           end: +new Date(),
-          failureMessage: stdout,
+          failureMessage: stderr,
         });
       });
   }
@@ -95,4 +95,4 @@ class CancelRun extends Error {
   }
 }
 
-module.exports = ESLintRunner;
+module.exports = PrettierRunner;
